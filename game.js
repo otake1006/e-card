@@ -250,36 +250,69 @@ class ECardGame {
   _tryReveal() {
     if (!this.myPlayedCard || !this.theirPlayedCard) return;
 
-    // 両者のカードを表向きに表示
-    this._setBattleCard('my-battle-card',    this.myPlayedCard,    false);
-    this._setBattleCard('their-battle-card', this.theirPlayedCard, false);
-
+    // 結果は先に計算（アニメーション中もスコアは確定済みにする）
     const result = this._getResult();
     if (result === 'mine')   this.score.mine++;
     if (result === 'theirs') this.score.theirs++;
 
+    this.roundDecisive = (result !== 'draw');
+    if (this.isHost && this.roundDecisive) this.send({ type: 'decisive' });
+
+    this._updateStatus('');
+
+    const myEl    = this.$('my-battle-card');
+    const theirEl = this.$('their-battle-card');
+
+    // ① 揺れる
+    myEl.classList.add('card-shaking');
+    theirEl.classList.add('card-shaking');
+
+    setTimeout(() => {
+      myEl.classList.remove('card-shaking');
+      theirEl.classList.remove('card-shaking');
+
+      // ② 折り畳む（flip-out）
+      myEl.classList.add('card-flip-out');
+      theirEl.classList.add('card-flip-out');
+
+      setTimeout(() => {
+        // ③ 中身を差し替えてバン！と開く（flip-in）
+        myEl.classList.remove('card-flip-out');
+        theirEl.classList.remove('card-flip-out');
+
+        this._setBattleCard('my-battle-card',    this.myPlayedCard,    false);
+        this._setBattleCard('their-battle-card', this.theirPlayedCard, false);
+
+        myEl.classList.add('card-flip-in', 'card-glow');
+        theirEl.classList.add('card-flip-in', 'card-glow');
+
+        setTimeout(() => {
+          myEl.classList.remove('card-flip-in', 'card-glow');
+          theirEl.classList.remove('card-flip-in', 'card-glow');
+
+          // ④ 結果表示
+          this._showRoundResult(result);
+        }, 300);
+      }, 150); // flip-out の長さ
+    }, 700);   // 揺れの長さ
+  }
+
+  _showRoundResult(result) {
     this.$('score-mine').textContent   = this.score.mine;
     this.$('score-theirs').textContent = this.score.theirs;
 
-    // 出されたカードの組み合わせを説明
     const myName    = CARD_NAMES[this.myPlayedCard];
     const theirName = CARD_NAMES[this.theirPlayedCard];
-    const detail    = `あなた: ${myName}　相手: ${theirName}`;
 
     const textMap  = { mine: 'あなたの勝ち！', theirs: '相手の勝ち…', draw: '引き分け' };
-    const classMap = { mine: 'result-win',       theirs: 'result-lose',   draw: 'result-draw' };
+    const classMap = { mine: 'result-win', theirs: 'result-lose', draw: 'result-draw' };
 
     const rt = this.$('result-text');
     rt.textContent = textMap[result];
     rt.className   = 'result-text ' + classMap[result];
-    this.$('result-detail').textContent = detail;
+    this.$('result-detail').textContent = `あなた: ${myName}　相手: ${theirName}`;
 
     this.$('result-area').classList.remove('hidden');
-    this._updateStatus('');
-
-    this.roundDecisive = (result !== 'draw');
-    // ホストが勝負決定を通知 → ゲスト側のボタンも正しく更新される
-    if (this.isHost && this.roundDecisive) this.send({ type: 'decisive' });
 
     const btn = this.$('btn-next');
     btn.disabled = false;

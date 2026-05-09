@@ -119,14 +119,14 @@ body {
   background: linear-gradient(90deg, var(--gold-dim), transparent);
 }
 .title-divider-icon {
-  color: var(--gold-dim);
+  color: var(--gold);
   font-size: 0.65rem;
   letter-spacing: 0.3em;
 }
 
 .title-sub {
   font-size: 0.68rem;
-  color: var(--cream-dim);
+  color: var(--cream);
   letter-spacing: 0.2em;
 }
 
@@ -158,8 +158,8 @@ body {
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--green-border);
 }
-.host-panel .panel-heading { color: var(--gold-dim); }
-.join-panel .panel-heading  { color: #3a6848; }
+.host-panel .panel-heading { color: var(--gold); }
+.join-panel .panel-heading  { color: var(--cream); }
 
 .panel-icon {
   font-size: 1.4rem;
@@ -169,7 +169,7 @@ body {
 
 .panel-desc {
   font-size: 0.7rem;
-  color: #3a5040;
+  color: var(--cream);
   line-height: 1.6;
 }
 
@@ -195,7 +195,7 @@ body {
   position: relative;
   font-size: 0.55rem;
   font-weight: 700;
-  color: #2a4030;
+  color: var(--cream);
   background: var(--green-dark);
   padding: 0.3rem 0;
   writing-mode: vertical-rl;
@@ -229,7 +229,7 @@ body {
 }
 .room-code-label {
   font-size: 0.58rem;
-  color: var(--gold-dim);
+  color: var(--cream);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-bottom: 0.3rem;
@@ -244,7 +244,7 @@ body {
 }
 
 .waiting-text {
-  color: #3a5040;
+  color: var(--cream);
   font-size: 0.72rem;
   text-align: center;
 }
@@ -265,7 +265,7 @@ body {
   margin-bottom: 0.5rem;
 }
 #code-input:focus { border-color: #3a8050; }
-#code-input::placeholder { color: #2a4030; }
+#code-input::placeholder { color: var(--cream); }
 
 .btn-join-action {
   background: transparent;
@@ -321,7 +321,7 @@ body {
 }
 .btn-primary:hover:not(:disabled)  { background: var(--gold-light); }
 .btn-primary:active:not(:disabled) { transform: scale(0.98); }
-.btn-primary:disabled { background: var(--green-border); color: #3a5040; cursor: not-allowed; }
+.btn-primary:disabled { background: var(--green-border); color: var(--cream); cursor: not-allowed; }
 
 .btn-small {
   background: transparent;
@@ -388,8 +388,8 @@ body {
 .emperor-option .role-symbol { color: var(--gold); }
 
 .role-name       { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--cream); }
-.role-cards-info { font-size: 0.7rem;  color: #3a5040; margin-bottom: 0.25rem; }
-.role-hint       { font-size: 0.68rem; color: #2a4030; }
+.role-cards-info { font-size: 0.7rem;  color: var(--cream); margin-bottom: 0.25rem; }
+.role-hint       { font-size: 0.68rem; color: var(--cream); }
 
 .rule-summary {
   background: var(--green-dark);
@@ -400,7 +400,7 @@ body {
   flex-direction: column;
   gap: 0.28rem;
 }
-.rule-row    { font-size: 0.78rem; color: #3a5040; }
+.rule-row    { font-size: 0.78rem; color: var(--cream); }
 .tag-slave   { color: var(--red-accent);  font-weight: 700; }
 .tag-emperor { color: var(--gold);        font-weight: 700; }
 .tag-citizen { color: #5a9870;            font-weight: 700; }
@@ -421,7 +421,7 @@ body {
 .player-score       { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
 .player-score.right { align-items: flex-end; }
 
-.score-role { font-size: 0.68rem; color: #3a5040; }
+.score-role { font-size: 0.68rem; color: var(--cream); }
 .score-num  { font-size: 2rem; font-weight: 900; color: var(--cream); line-height: 1; }
 
 .round-badge {
@@ -453,7 +453,7 @@ body {
   align-items: center;
   gap: 0.4rem;
 }
-.battle-label { font-size: 0.68rem; color: #3a5040; }
+.battle-label { font-size: 0.68rem; color: var(--cream); }
 
 .battle-card {
   width: 86px;
@@ -483,13 +483,13 @@ body {
 .battle-card.card-emperor { border-color: var(--gold);       background: rgba(200,160,48,0.12); color: var(--gold-light); }
 .battle-card.card-citizen { border-color: #2a6840;           background: rgba(42,104,64,0.12);  color: #5a9870; }
 
-.battle-vs { font-size: 1.2rem; font-weight: 900; color: var(--green-border); }
+.battle-vs { font-size: 1.2rem; font-weight: 900; color: var(--cream); }
 
 /* ─── ゲームステータス ───────────────────────────── */
 
 .game-status {
   font-size: 0.85rem;
-  color: #3a5040;
+  color: var(--cream);
   text-align: center;
   min-height: 1.3em;
 }
@@ -511,11 +511,11 @@ body {
 }
 .result-win  { color: var(--gold); }
 .result-lose { color: var(--red-accent); }
-.result-draw { color: #4a7858; }
+.result-draw { color: var(--cream); }
 
 .result-detail {
   font-size: 0.78rem;
-  color: #3a5040;
+  color: var(--cream);
   margin-bottom: 0.3rem;
 }
 
@@ -530,7 +530,7 @@ body {
 }
 .hand-label {
   font-size: 0.68rem;
-  color: #2a4030;
+  color: var(--cream);
   letter-spacing: 0.05em;
   align-self: flex-start;
 }
@@ -585,9 +585,9 @@ body {
 }
 .end-title.win  { color: var(--gold);       text-shadow: 0 0 24px rgba(200,160,48,0.4); }
 .end-title.lose { color: var(--red-accent); text-shadow: 0 0 24px rgba(192,64,48,0.35); }
-.end-title.draw { color: #4a7858; }
+.end-title.draw { color: var(--cream); }
 
-.end-score { color: #4a6850; font-size: 1rem; }
+.end-score { color: var(--cream); font-size: 1rem; }
 
 /* ─── レスポンシブ ───────────────────────────────── */
 

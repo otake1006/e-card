@@ -1,0 +1,600 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── ベース ─────────────────────────────────────── */
+
+:root {
+  --green-deep:   #1a3d1e;
+  --green-dark:   #1f4823;
+  --green-mid:    #255228;
+  --green-border: #2e6633;
+  --green-light:  #3a7a40;
+  --gold:         #c8a030;
+  --gold-light:   #e8c050;
+  --gold-dim:     #7a6020;
+  --cream:        #f0e8d0;
+  --cream-dim:    #a09070;
+  --cream-ghost:  #3a3020;
+  --red-dim:      #6a2020;
+  --red-accent:   #c04030;
+}
+
+body {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  background: #1a3d1e;
+  color: var(--cream);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  width: 100%;
+  max-width: 460px;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+.screen.active { display: flex; }
+
+.hidden { display: none !important; }
+
+/* ─── タイトル画面 ───────────────────────────────── */
+
+#screen-lobby {
+  position: relative;
+  overflow: hidden;
+  justify-content: center;
+  gap: 2rem;
+}
+
+/* カードテーブルの縫い目風枠 */
+#screen-lobby::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid var(--green-border);
+  border-radius: 16px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* タイトルセクション */
+.title-section {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.title-crown {
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+  filter: drop-shadow(0 0 12px rgba(200,160,48,0.5));
+}
+
+.title-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.1rem;
+}
+
+.title-e {
+  font-size: 7rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 0.9;
+  text-shadow:
+    0 0 24px rgba(200,160,48,0.55),
+    0 3px 0 rgba(0,0,0,0.7);
+}
+
+.title-kana {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--cream);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+.title-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.4rem 0;
+}
+.title-divider::before,
+.title-divider::after {
+  content: '';
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.title-divider::after {
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+.title-divider-icon {
+  color: var(--gold-dim);
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+}
+
+.title-sub {
+  font-size: 0.68rem;
+  color: var(--cream-dim);
+  letter-spacing: 0.2em;
+}
+
+/* 2パネル */
+.title-panels {
+  width: 100%;
+  display: flex;
+  border: 1px solid var(--green-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.title-panel {
+  flex: 1;
+  padding: 1.3rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  background: var(--green-dark);
+}
+
+.host-panel { border-right: 1px solid var(--green-border); }
+
+.panel-heading {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--green-border);
+}
+.host-panel .panel-heading { color: var(--gold-dim); }
+.join-panel .panel-heading  { color: #3a6848; }
+
+.panel-icon {
+  font-size: 1.4rem;
+  display: block;
+  text-align: center;
+}
+
+.panel-desc {
+  font-size: 0.7rem;
+  color: #3a5040;
+  line-height: 1.6;
+}
+
+/* OR仕切り */
+.panel-or {
+  width: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-dark);
+  border-right: 1px solid var(--green-border);
+  position: relative;
+}
+.panel-or::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  background: var(--green-border);
+}
+.panel-or span {
+  position: relative;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #2a4030;
+  background: var(--green-dark);
+  padding: 0.3rem 0;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.1em;
+}
+
+/* 部屋作るボタン */
+.btn-host {
+  background: var(--gold);
+  color: #080e08;
+  border: none;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 100%;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-host:hover  { background: var(--gold-light); }
+.btn-host:active { transform: scale(0.97); }
+
+/* 部屋コード表示 */
+.room-code-box {
+  background: var(--green-deep);
+  border: 1px solid var(--green-border);
+  border-radius: 5px;
+  padding: 0.8rem 0.7rem;
+  text-align: center;
+}
+.room-code-label {
+  font-size: 0.58rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+.room-code-value {
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  color: var(--gold);
+  word-break: break-all;
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.03em;
+}
+
+.waiting-text {
+  color: #3a5040;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+/* 参加入力 */
+.join-row { width: 100%; }
+
+#code-input {
+  width: 100%;
+  background: var(--green-deep);
+  border: 1.5px solid var(--green-border);
+  color: var(--cream);
+  padding: 0.7rem 0.85rem;
+  font-size: 0.88rem;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 0.5rem;
+}
+#code-input:focus { border-color: #3a8050; }
+#code-input::placeholder { color: #2a4030; }
+
+.btn-join-action {
+  background: transparent;
+  color: #5a9870;
+  border: 1.5px solid #2a5035;
+  padding: 0.7rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-join-action:hover {
+  background: rgba(58,128,80,0.15);
+  border-color: #4a7860;
+}
+
+/* エラーメッセージ */
+.msg {
+  color: #e07060;
+  font-size: 0.8rem;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+/* 点滅 */
+.ellipsis::after {
+  content: '';
+  animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+/* ─── ボタン共通 ─────────────────────────────────── */
+
+.btn-primary {
+  background: var(--gold);
+  color: #080e08;
+  border: none;
+  padding: 0.78rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 100%;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover:not(:disabled)  { background: var(--gold-light); }
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.btn-primary:disabled { background: var(--green-border); color: #3a5040; cursor: not-allowed; }
+
+.btn-small {
+  background: transparent;
+  color: var(--gold-dim);
+  border: 1px solid var(--green-border);
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-small:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ─── 役割選択 ───────────────────────────────────── */
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.hint {
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+#role-select {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+}
+
+.role-options {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.role-option {
+  flex: 1;
+  background: var(--green-dark);
+  border: 2px solid var(--green-border);
+  border-radius: 8px;
+  padding: 1.3rem 0.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.role-option:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+.kaiji-option:hover   { border-color: var(--red-accent); }
+.emperor-option:hover { border-color: var(--gold); }
+
+.role-symbol {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.45rem;
+}
+.kaiji-option .role-symbol   { color: var(--red-accent); }
+.emperor-option .role-symbol { color: var(--gold); }
+
+.role-name       { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--cream); }
+.role-cards-info { font-size: 0.7rem;  color: #3a5040; margin-bottom: 0.25rem; }
+.role-hint       { font-size: 0.68rem; color: #2a4030; }
+
+.rule-summary {
+  background: var(--green-dark);
+  border: 1px solid var(--green-border);
+  border-radius: 5px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+.rule-row    { font-size: 0.78rem; color: #3a5040; }
+.tag-slave   { color: var(--red-accent);  font-weight: 700; }
+.tag-emperor { color: var(--gold);        font-weight: 700; }
+.tag-citizen { color: #5a9870;            font-weight: 700; }
+
+/* ─── ゲームヘッダー ─────────────────────────────── */
+
+.game-header {
+  width: 100%;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--green-border);
+}
+.game-header > * {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.player-score       { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+.player-score.right { align-items: flex-end; }
+
+.score-role { font-size: 0.68rem; color: #3a5040; }
+.score-num  { font-size: 2rem; font-weight: 900; color: var(--cream); line-height: 1; }
+
+.round-badge {
+  background: var(--green-dark);
+  border: 1px solid var(--green-border);
+  border-radius: 20px;
+  padding: 0.28rem 0.85rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.round-sep { color: var(--green-border); margin: 0 0.1rem; }
+
+/* ─── バトルゾーン ───────────────────────────────── */
+
+.battle-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.8rem 0;
+}
+
+.battle-card-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.battle-label { font-size: 0.68rem; color: #3a5040; }
+
+.battle-card {
+  width: 86px;
+  height: 120px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  border: 2px solid;
+  transition: all 0.3s ease;
+}
+
+.battle-card.face-down {
+  border-color: var(--green-border);
+  background: var(--green-dark);
+  color: var(--green-border);
+}
+.battle-card.face-down.committed {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 10px rgba(200,160,48,0.2);
+}
+
+.battle-card.card-slave   { border-color: var(--red-accent); background: rgba(192,64,48,0.12);  color: #e06050; }
+.battle-card.card-emperor { border-color: var(--gold);       background: rgba(200,160,48,0.12); color: var(--gold-light); }
+.battle-card.card-citizen { border-color: #2a6840;           background: rgba(42,104,64,0.12);  color: #5a9870; }
+
+.battle-vs { font-size: 1.2rem; font-weight: 900; color: var(--green-border); }
+
+/* ─── ゲームステータス ───────────────────────────── */
+
+.game-status {
+  font-size: 0.85rem;
+  color: #3a5040;
+  text-align: center;
+  min-height: 1.3em;
+}
+
+/* ─── ラウンド結果 ───────────────────────────────── */
+
+.result-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.4rem 0;
+}
+
+.result-text {
+  font-size: 2rem;
+  font-weight: 900;
+}
+.result-win  { color: var(--gold); }
+.result-lose { color: var(--red-accent); }
+.result-draw { color: #4a7858; }
+
+.result-detail {
+  font-size: 0.78rem;
+  color: #3a5040;
+  margin-bottom: 0.3rem;
+}
+
+/* ─── 手札ゾーン ─────────────────────────────────── */
+
+.hand-zone {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+.hand-label {
+  font-size: 0.68rem;
+  color: #2a4030;
+  letter-spacing: 0.05em;
+  align-self: flex-start;
+}
+
+.hand {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hand-card {
+  width: 64px;
+  height: 90px;
+  border-radius: 6px;
+  border: 2px solid var(--green-border);
+  background: var(--green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+.hand-card:hover { transform: translateY(-4px); }
+
+.hand-card.card-slave   { border-color: var(--red-dim); color: #c05040; }
+.hand-card.card-emperor { border-color: var(--gold-dim); color: var(--gold); }
+.hand-card.card-citizen { border-color: #1e4830; color: #4a8860; }
+
+.hand-card.selected { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.hand-card.card-slave.selected   { border-color: var(--red-accent); background: rgba(192,64,48,0.15); }
+.hand-card.card-emperor.selected { border-color: var(--gold);       background: rgba(200,160,48,0.15); }
+.hand-card.card-citizen.selected { border-color: #4a8860;           background: rgba(42,104,64,0.15); }
+
+/* ─── ゲーム終了 ─────────────────────────────────── */
+
+.end-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  text-align: center;
+}
+
+.end-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.end-title.win  { color: var(--gold);       text-shadow: 0 0 24px rgba(200,160,48,0.4); }
+.end-title.lose { color: var(--red-accent); text-shadow: 0 0 24px rgba(192,64,48,0.35); }
+.end-title.draw { color: #4a7858; }
+
+.end-score { color: #4a6850; font-size: 1rem; }
+
+/* ─── レスポンシブ ───────────────────────────────── */
+
+@media (max-width: 360px) {
+  .hand-card   { width: 54px; height: 76px; font-size: 0.72rem; }
+  .battle-card { width: 72px; height: 100px; }
+  .score-num   { font-size: 1.6rem; }
+  .title-e     { font-size: 5.5rem; }
+  .title-kana  { font-size: 2.4rem; }
+}

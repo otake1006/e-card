@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eカード</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- タイトル画面 -->
+<div id="screen-lobby" class="screen active">
+
+  <div class="title-section">
+    <div class="title-crown">♛</div>
+    <div class="title-logo">
+      <span class="title-e">E</span><span class="title-kana">カード</span>
+    </div>
+    <div class="title-divider">
+      <span class="title-divider-icon">◆ ◆ ◆</span>
+    </div>
+    <div class="title-sub">奴隷と皇帝と市民</div>
+  </div>
+
+  <div class="title-panels">
+
+    <!-- ホストパネル -->
+    <div class="title-panel host-panel">
+      <div class="panel-heading">ホストとして開始</div>
+      <div id="lobby-actions">
+        <p class="panel-desc">部屋を作ってルームコードを相手に共有</p>
+        <button class="btn-host" onclick="game.createRoom()">部屋を作る</button>
+      </div>
+      <div id="lobby-waiting" class="hidden">
+        <div class="room-code-box">
+          <div class="room-code-label">ルームコード</div>
+          <div id="room-code" class="room-code-value">---</div>
+          <button class="btn-small" onclick="game.copyCode()">コピー</button>
+        </div>
+        <p class="waiting-text">相手の参加を待っています<span class="ellipsis"></span></p>
+      </div>
+    </div>
+
+    <div class="panel-or"><span>OR</span></div>
+
+    <!-- 参加パネル -->
+    <div class="title-panel join-panel">
+      <div class="panel-heading">ルームに参加</div>
+      <p class="panel-desc">相手から受け取ったコードを入力</p>
+      <div class="join-row">
+        <input id="code-input" type="text" placeholder="ルームコードを入力"
+               autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn-join-action" onclick="game.joinRoom()">参加する</button>
+    </div>
+
+  </div>
+
+  <div id="lobby-msg" class="msg"></div>
+</div>
+
+<!-- 役割選択 -->
+<div id="screen-role" class="screen">
+  <h2 class="section-title">役割を選択</h2>
+  <div id="role-select" class="hidden">
+    <p class="hint">あなたの役割を選んでください</p>
+    <div class="role-options">
+      <div class="role-option kaiji-option" onclick="game.chooseRole('kaiji')">
+        <div class="role-symbol">奴</div>
+        <div class="role-name">カイジ側</div>
+        <div class="role-cards-info">奴隷 ×1　市民 ×4</div>
+        <div class="role-hint">奴隷が皇帝に勝てる</div>
+      </div>
+      <div class="role-option emperor-option" onclick="game.chooseRole('emperor')">
+        <div class="role-symbol">皇</div>
+        <div class="role-name">帝愛側</div>
+        <div class="role-cards-info">皇帝 ×1　市民 ×4</div>
+        <div class="role-hint">皇帝が市民に勝てる</div>
+      </div>
+    </div>
+    <div class="rule-summary">
+      <div class="rule-row"><span class="tag-slave">奴隷</span> &gt; <span class="tag-emperor">皇帝</span></div>
+      <div class="rule-row"><span class="tag-emperor">皇帝</span> &gt; <span class="tag-citizen">市民</span></div>
+      <div class="rule-row"><span class="tag-emperor">皇帝</span> &gt; <span class="tag-slave">奴隷</span> ×（奴隷が唯一皇帝に勝てる）</div>
+      <div class="rule-row"><span class="tag-citizen">市民</span> vs <span class="tag-citizen">市民</span> ＝ 引き分け</div>
+    </div>
+  </div>
+  <div id="role-waiting" class="hidden">
+    <p class="waiting-text">ホストが役割を選択しています<span class="ellipsis"></span></p>
+  </div>
+</div>
+
+<!-- ゲーム -->
+<div id="screen-game" class="screen">
+  <header class="game-header">
+    <div class="player-score">
+      <span class="score-role" id="my-role-name">あなた</span>
+      <span class="score-num" id="score-mine">0</span>
+    </div>
+    <div class="round-badge">
+      <span id="round-num">1</span><span class="round-sep">/</span><span>5</span>
+    </div>
+    <div class="player-score right">
+      <span class="score-num" id="score-theirs">0</span>
+      <span class="score-role" id="their-role-name">相手</span>
+    </div>
+  </header>
+
+  <div class="battle-zone">
+    <div class="battle-card-area">
+      <div class="battle-label">相手のカード</div>
+      <div id="their-battle-card" class="battle-card face-down"><span>?</span></div>
+    </div>
+    <div class="battle-vs">VS</div>
+    <div class="battle-card-area">
+      <div class="battle-label">あなたのカード</div>
+      <div id="my-battle-card" class="battle-card face-down"><span>?</span></div>
+    </div>
+  </div>
+
+  <div id="game-status" class="game-status">カードを選んでください</div>
+
+  <div id="result-area" class="result-area hidden">
+    <div id="result-text" class="result-text"></div>
+    <div id="result-detail" class="result-detail"></div>
+    <button id="btn-next" class="btn-primary" onclick="game.readyNext()">次のラウンドへ</button>
+  </div>
+
+  <div id="hand-zone" class="hand-zone">
+    <div class="hand-label">手札（クリックで選択）</div>
+    <div id="hand" class="hand"></div>
+    <button id="btn-play" class="btn-primary hidden" onclick="game.playSelected()">このカードを出す</button>
+  </div>
+</div>
+
+<!-- ゲーム終了 -->
+<div id="screen-end" class="screen">
+  <div class="end-content">
+    <div id="end-title" class="end-title"></div>
+    <div id="end-score" class="end-score"></div>
+    <button class="btn-primary" onclick="location.reload()">もう一度プレイ</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

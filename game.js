@@ -295,37 +295,53 @@ class ECardGame {
     if (ctx.state === 'suspended') ctx.resume();
     const now = ctx.currentTime;
 
-    // コンプレッサーで音割れ防止
+    // 全体をブーストしてからコンプレッサーでリミット
     const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -6;
+    comp.ratio.value     = 6;
+    comp.attack.value    = 0.001;
+    comp.release.value   = 0.1;
     comp.connect(ctx.destination);
 
-    // 太鼓のドン：160Hz → 55Hz にピッチ降下
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(160, now);
-    osc.frequency.exponentialRampToValueAtTime(55, now + 0.35);
-    oscGain.gain.setValueAtTime(1.0, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-    osc.connect(oscGain);
-    oscGain.connect(comp);
-    osc.start(now);
-    osc.stop(now + 0.7);
+    const master = ctx.createGain();
+    master.gain.value = 2.5;
+    master.connect(comp);
 
-    // アタック感を出すノイズ（短め）
-    const noiseLen = Math.floor(ctx.sampleRate * 0.08);
-    const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+    // メインキック: 320Hz → 90Hz（スマホ対応）
+    const osc1 = ctx.createOscillator();
+    const g1   = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(320, now);
+    osc1.frequency.exponentialRampToValueAtTime(90, now + 0.3);
+    g1.gain.setValueAtTime(1.0, now);
+    g1.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    osc1.connect(g1); g1.connect(master);
+    osc1.start(now); osc1.stop(now + 0.6);
+
+    // 倍音で厚みを出す: 640Hz → 180Hz
+    const osc2 = ctx.createOscillator();
+    const g2   = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(640, now);
+    osc2.frequency.exponentialRampToValueAtTime(180, now + 0.18);
+    g2.gain.setValueAtTime(0.7, now);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc2.connect(g2); g2.connect(master);
+    osc2.start(now); osc2.stop(now + 0.3);
+
+    // アタック感ノイズ
+    const noiseLen  = Math.floor(ctx.sampleRate * 0.1);
+    const noiseBuf  = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
     const noiseData = noiseBuf.getChannelData(0);
     for (let i = 0; i < noiseLen; i++) {
       noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseLen);
     }
-    const noiseSrc = ctx.createBufferSource();
+    const noiseSrc  = ctx.createBufferSource();
     noiseSrc.buffer = noiseBuf;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.8, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-    noiseSrc.connect(noiseGain);
-    noiseGain.connect(comp);
+    const gNoise    = ctx.createGain();
+    gNoise.gain.setValueAtTime(1.0, now);
+    gNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    noiseSrc.connect(gNoise); gNoise.connect(master);
     noiseSrc.start(now);
   }
 

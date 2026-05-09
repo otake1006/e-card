@@ -105,6 +105,13 @@ class ECardGame {
         this.theyReadyNext = true;
         this._tryNextRound();
         break;
+
+      // ホストから「勝負決定」通知（ゲスト側のボタン修正用）
+      case 'decisive':
+        this.roundDecisive = true;
+        const btn = this.$('btn-next');
+        btn.textContent = 'リザルトを見る';
+        break;
     }
   }
 
@@ -137,6 +144,7 @@ class ECardGame {
     this.theyCommitted   = false;
     this.iReadyNext      = false;
     this.theyReadyNext   = false;
+    this.roundDecisive   = false;
 
     const roleLabel = { kaiji: 'カイジ側', emperor: '帝愛側' };
     const theirRole = this.myRole === 'kaiji' ? 'emperor' : 'kaiji';
@@ -239,9 +247,13 @@ class ECardGame {
     this.$('result-area').classList.remove('hidden');
     this._updateStatus('');
 
+    this.roundDecisive = (result !== 'draw');
+    // ホストが勝負決定を通知 → ゲスト側のボタンも正しく更新される
+    if (this.isHost && this.roundDecisive) this.send({ type: 'decisive' });
+
     const btn = this.$('btn-next');
     btn.disabled = false;
-    if (result !== 'draw') {
+    if (this.roundDecisive) {
       btn.textContent = 'リザルトを見る';
     } else if (this.round >= 5) {
       btn.textContent = '結果を見る';
@@ -280,8 +292,7 @@ class ECardGame {
 
   _tryNextRound() {
     if (!this.iReadyNext || !this.theyReadyNext) return;
-    // 勝敗が決まっていたら即リザルト
-    if (this.score.mine > 0 || this.score.theirs > 0 || this.round >= 5) {
+    if (this.roundDecisive || this.round >= 5) {
       this._showEnd();
     } else {
       this.round++;

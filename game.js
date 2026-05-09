@@ -28,31 +28,61 @@ class ECardGame {
 
   // ─── ネットワーク ───────────────────────────────────────────
 
-  createRoom() {
-    this.isHost = true;
-    this.peer = new Peer();
-    this.peer.on('open', id => {
-      this.$('room-code').textContent = id;
-      this.$('lobby-actions').classList.add('hidden');
+  // 合言葉をPeerJS IDに変換（FNV-1aハッシュ）
+  _passphraseToId(passphrase) {
+    let hash = 0x811c9dc5;
+    const s = passphrase.trim().toLowerCase();
+    for (let i = 0; i < s.length; i++) {
+      hash ^= s.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return 'ecard-' + hash.toString(36);
+  }
+
+  connect() {
+    const passphrase = this.$('passphrase-input').value.trim();
+    if (!passphrase) { this.showMsg('合言葉を入力してください'); return; }
+
+    const peerId = this._passphraseToId(passphrase);
+    this.showMsg('接続中…');
+
+    // まず同じIDでPeerを作成してみる → 成功すればホスト
+    this.peer = new Peer(peerId);
+
+    this.peer.on('open', () => {
+      // IDが取れた → ホスト。相手を待つ
+      this.isHost = true;
+      this.showMsg('');
+      this.$('lobby-form').classList.add('hidden');
+      this.$('passphrase-display').textContent = passphrase;
       this.$('lobby-waiting').classList.remove('hidden');
     });
+
     this.peer.on('connection', conn => {
       this.conn = conn;
       this._setupConn();
-      // ホストだけ役割選択UIを表示
       this.showScreen('role');
       this.$('role-select').classList.remove('hidden');
     });
-    this.peer.on('error', e => this.showMsg('エラー: ' + e.type));
+
+    this.peer.on('error', e => {
+      if (e.type === 'unavailable-id') {
+        // IDが使用中 → ゲストとして接続
+        this._connectAsGuest(peerId, passphrase);
+      } else {
+        this.showMsg('エラー: ' + e.type);
+      }
+    });
   }
 
-  joinRoom() {
-    const code = this.$('code-input').value.trim();
-    if (!code) { this.showMsg('ルームコードを入力してください'); return; }
+  _connectAsGuest(hostId, passphrase) {
+    this.peer.destroy();
     this.isHost = false;
+    this.showMsg('マッチング中…');
+
     this.peer = new Peer();
     this.peer.on('open', () => {
-      this.conn = this.peer.connect(code, { reliable: true });
+      this.conn = this.peer.connect(hostId, { reliable: true });
       this._setupConn();
     });
     this.peer.on('error', e => this.showMsg('接続失敗: ' + e.type));
@@ -347,12 +377,6 @@ class ECardGame {
 
   showMsg(msg) { this.$('lobby-msg').textContent = msg; }
 
-  copyCode() {
-    const code = this.$('room-code').textContent;
-    navigator.clipboard.writeText(code)
-      .then(()  => this.showMsg('コピーしました'))
-      .catch(()  => this.showMsg('コピー失敗: 手動でコピーしてください'));
-  }
 }
 
 const game = new ECardGame();

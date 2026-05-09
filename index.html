@@ -22,38 +22,21 @@
     <div class="title-sub">奴隷と皇帝と市民</div>
   </div>
 
-  <div class="title-panels">
+  <div id="lobby-form" class="lobby-form">
+    <div class="passphrase-label">合言葉を入力して入室</div>
+    <p class="passphrase-hint">相手と同じ合言葉を入力すると自動でマッチします</p>
+    <input id="passphrase-input" type="text" placeholder="例: さくら、ドラゴン …"
+           autocomplete="off" spellcheck="false"
+           onkeydown="if(event.key==='Enter') game.connect()">
+    <button class="btn-host" onclick="game.connect()">入室する</button>
+  </div>
 
-    <!-- ホストパネル -->
-    <div class="title-panel host-panel">
-      <div class="panel-heading">ホストとして開始</div>
-      <div id="lobby-actions">
-        <p class="panel-desc">部屋を作ってルームコードを相手に共有</p>
-        <button class="btn-host" onclick="game.createRoom()">部屋を作る</button>
-      </div>
-      <div id="lobby-waiting" class="hidden">
-        <div class="room-code-box">
-          <div class="room-code-label">ルームコード</div>
-          <div id="room-code" class="room-code-value">---</div>
-          <button class="btn-small" onclick="game.copyCode()">コピー</button>
-        </div>
-        <p class="waiting-text">相手の参加を待っています<span class="ellipsis"></span></p>
-      </div>
+  <div id="lobby-waiting" class="hidden">
+    <div class="waiting-box">
+      <p class="waiting-label">合言葉</p>
+      <p id="passphrase-display" class="waiting-passphrase"></p>
+      <p class="waiting-text">相手の入室を待っています<span class="ellipsis"></span></p>
     </div>
-
-    <div class="panel-or"><span>OR</span></div>
-
-    <!-- 参加パネル -->
-    <div class="title-panel join-panel">
-      <div class="panel-heading">ルームに参加</div>
-      <p class="panel-desc">相手から受け取ったコードを入力</p>
-      <div class="join-row">
-        <input id="code-input" type="text" placeholder="ルームコードを入力"
-               autocomplete="off" spellcheck="false">
-      </div>
-      <button class="btn-join-action" onclick="game.joinRoom()">参加する</button>
-    </div>
-
   </div>
 
   <div id="lobby-msg" class="msg"></div>

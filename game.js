@@ -245,6 +245,62 @@ class ECardGame {
     this._updateStatus();
   }
 
+  // ─── サウンド ───────────────────────────────────────────────
+
+  _getAudioCtx() {
+    if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return this._audioCtx;
+  }
+
+  _scheduleSnareHit(ctx, time, vol) {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(vol, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(time);
+  }
+
+  _startDrumRoll(durationMs) {
+    const ctx = this._getAudioCtx();
+    const duration = durationMs / 1000;
+    const now = ctx.currentTime;
+    // accelerating hits: slow → fast
+    const hitCount = 28;
+    for (let i = 0; i < hitCount; i++) {
+      const progress = i / (hitCount - 1);
+      // quadratic ease-in: hits cluster toward the end
+      const t = now + duration * (progress * progress);
+      const vol = 0.3 + progress * 0.5;
+      this._scheduleSnareHit(ctx, t, vol);
+    }
+  }
+
+  _playBangSound() {
+    const ctx = this._getAudioCtx();
+    const now = ctx.currentTime;
+
+    // low thud
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+    oscGain.gain.setValueAtTime(1.2, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.4);
+
+    // noise burst
+    this._scheduleSnareHit(ctx, now, 1.5);
+  }
+
   // ─── 公開・結果 ────────────────────────────────────────────
 
   _tryReveal() {
@@ -263,9 +319,10 @@ class ECardGame {
     const myEl    = this.$('my-battle-card');
     const theirEl = this.$('their-battle-card');
 
-    // ① 揺れる
+    // ① 揺れる + ドラムロール
     myEl.classList.add('card-shaking');
     theirEl.classList.add('card-shaking');
+    this._startDrumRoll(1500);
 
     setTimeout(() => {
       myEl.classList.remove('card-shaking');
@@ -283,6 +340,7 @@ class ECardGame {
         this._setBattleCard('my-battle-card',    this.myPlayedCard,    false);
         this._setBattleCard('their-battle-card', this.theirPlayedCard, false);
 
+        this._playBangSound();
         myEl.classList.add('card-flip-in', 'card-glow');
         theirEl.classList.add('card-flip-in', 'card-glow');
 
@@ -294,7 +352,7 @@ class ECardGame {
           this._showRoundResult(result);
         }, 300);
       }, 150); // flip-out の長さ
-    }, 700);   // 揺れの長さ
+    }, 1500);  // 揺れの長さ
   }
 
   _showRoundResult(result) {

@@ -221,6 +221,7 @@ class ECardGame {
 
   playSelected() {
     if (this.selectedIdx === null || this.iCommitted) return;
+    this._warmUpAudio();
 
     const card = this.myHand[this.selectedIdx];
     this.myPlayedCard = card;
@@ -248,19 +249,28 @@ class ECardGame {
   // ─── サウンド ───────────────────────────────────────────────
 
   _getAudioCtx() {
-    if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!this._audioCtx) {
+      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
     return this._audioCtx;
   }
 
+  // ユーザー操作のタイミングで AudioContext を起動しておく
+  _warmUpAudio() {
+    const ctx = this._getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+
   _scheduleSnareHit(ctx, time, vol) {
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const len = Math.floor(ctx.sampleRate * 0.06);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.5);
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(vol, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
     src.connect(gain);
     gain.connect(ctx.destination);
     src.start(time);
@@ -268,37 +278,49 @@ class ECardGame {
 
   _startDrumRoll(durationMs) {
     const ctx = this._getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
     const duration = durationMs / 1000;
     const now = ctx.currentTime;
-    // accelerating hits: slow → fast
-    const hitCount = 28;
+    const hitCount = 30;
     for (let i = 0; i < hitCount; i++) {
       const progress = i / (hitCount - 1);
-      // quadratic ease-in: hits cluster toward the end
       const t = now + duration * (progress * progress);
-      const vol = 0.3 + progress * 0.5;
+      const vol = 0.25 + progress * 0.55;
       this._scheduleSnareHit(ctx, t, vol);
     }
   }
 
   _playBangSound() {
     const ctx = this._getAudioCtx();
+    if (ctx.state === 'suspended') { ctx.resume(); }
     const now = ctx.currentTime;
 
-    // low thud
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
-    oscGain.gain.setValueAtTime(1.2, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.4);
+    // 低音ドン（キック）
+    const kick = ctx.createOscillator();
+    const kickGain = ctx.createGain();
+    kick.type = 'sine';
+    kick.frequency.setValueAtTime(180, now);
+    kick.frequency.exponentialRampToValueAtTime(35, now + 0.25);
+    kickGain.gain.setValueAtTime(3.0, now);
+    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    kick.connect(kickGain);
+    kickGain.connect(ctx.destination);
+    kick.start(now);
+    kick.stop(now + 0.5);
 
-    // noise burst
-    this._scheduleSnareHit(ctx, now, 1.5);
+    // 高音ノイズバースト（パァン！）
+    const noiseLen = Math.floor(ctx.sampleRate * 0.15);
+    const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+    const noiseData = noiseBuf.getChannelData(0);
+    for (let i = 0; i < noiseLen; i++) noiseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / noiseLen, 0.5);
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noiseBuf;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(2.5, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    noiseSrc.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noiseSrc.start(now);
   }
 
   // ─── 公開・結果 ────────────────────────────────────────────

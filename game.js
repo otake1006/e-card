@@ -240,8 +240,14 @@ class ECardGame {
     this._updateStatus('');
 
     const btn = this.$('btn-next');
-    btn.disabled    = false;
-    btn.textContent = this.round >= 5 ? '結果を見る' : '次のラウンドへ';
+    btn.disabled = false;
+    if (result !== 'draw') {
+      btn.textContent = 'リザルトを見る';
+    } else if (this.round >= 5) {
+      btn.textContent = '結果を見る';
+    } else {
+      btn.textContent = '次のラウンドへ';
+    }
   }
 
   _getResult() {
@@ -274,7 +280,8 @@ class ECardGame {
 
   _tryNextRound() {
     if (!this.iReadyNext || !this.theyReadyNext) return;
-    if (this.round >= 5) {
+    // 勝敗が決まっていたら即リザルト
+    if (this.score.mine > 0 || this.score.theirs > 0 || this.round >= 5) {
       this._showEnd();
     } else {
       this.round++;
@@ -285,12 +292,15 @@ class ECardGame {
   _showEnd() {
     this.showScreen('end');
     const { mine, theirs } = this.score;
-    const draws = 5 - mine - theirs;
+    const draws = this.round - mine - theirs;
     const title = this.$('end-title');
     if      (mine > theirs) { title.textContent = '勝利！';   title.className = 'end-title win'; }
     else if (mine < theirs) { title.textContent = '敗北…';   title.className = 'end-title lose'; }
     else                    { title.textContent = '引き分け'; title.className = 'end-title draw'; }
-    this.$('end-score').textContent = `${mine} 勝 ─ ${draws} 引き分け ─ ${theirs} 敗`;
+
+    const drawText = draws > 0 ? `${draws}回の引き分けを経て` : '';
+    const resultText = mine > theirs ? 'あなたの勝利' : theirs > mine ? '相手の勝利' : '引き分け';
+    this.$('end-score').textContent = drawText ? `${drawText}${resultText}` : resultText;
   }
 
   // ─── UIヘルパー ────────────────────────────────────────────

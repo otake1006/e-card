@@ -292,34 +292,40 @@ class ECardGame {
 
   _playBangSound() {
     const ctx = this._getAudioCtx();
-    if (ctx.state === 'suspended') { ctx.resume(); }
+    if (ctx.state === 'suspended') ctx.resume();
     const now = ctx.currentTime;
 
-    // 低音ドン（キック）
-    const kick = ctx.createOscillator();
-    const kickGain = ctx.createGain();
-    kick.type = 'sine';
-    kick.frequency.setValueAtTime(180, now);
-    kick.frequency.exponentialRampToValueAtTime(35, now + 0.25);
-    kickGain.gain.setValueAtTime(3.0, now);
-    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-    kick.connect(kickGain);
-    kickGain.connect(ctx.destination);
-    kick.start(now);
-    kick.stop(now + 0.5);
+    // コンプレッサーで音割れ防止
+    const comp = ctx.createDynamicsCompressor();
+    comp.connect(ctx.destination);
 
-    // 高音ノイズバースト（パァン！）
-    const noiseLen = Math.floor(ctx.sampleRate * 0.15);
+    // 太鼓のドン：160Hz → 55Hz にピッチ降下
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(55, now + 0.35);
+    oscGain.gain.setValueAtTime(1.0, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc.connect(oscGain);
+    oscGain.connect(comp);
+    osc.start(now);
+    osc.stop(now + 0.7);
+
+    // アタック感を出すノイズ（短め）
+    const noiseLen = Math.floor(ctx.sampleRate * 0.08);
     const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
     const noiseData = noiseBuf.getChannelData(0);
-    for (let i = 0; i < noiseLen; i++) noiseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / noiseLen, 0.5);
+    for (let i = 0; i < noiseLen; i++) {
+      noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseLen);
+    }
     const noiseSrc = ctx.createBufferSource();
     noiseSrc.buffer = noiseBuf;
     const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(2.5, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    noiseGain.gain.setValueAtTime(0.8, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
     noiseSrc.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
+    noiseGain.connect(comp);
     noiseSrc.start(now);
   }
 
